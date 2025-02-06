@@ -1,88 +1,49 @@
-import pygame
+import pygame as pg
+import sys
+from pygame import K_ESCAPE
+from settings import *
+from map import *
+from player import *
 
-pygame.init()
-width = 1024
-height = 768
+class Game:
+    def __init__(self):
+        pg.init()
+        self.screen = pg.display.set_mode(RES)
+        self.clock = pg.time.Clock()
+        self.new_game()
+        self.delta_time = 1
 
-screen = pygame.display.set_mode((width, height))
-screen.fill("black")
+    def new_game(self):
+        self.map = Map(self)
+        self.player = Player(self)
 
-clock = pygame.time.Clock()
+    def update(self):
+        self.player.update()
+        pg.display.flip()
+        self.delta_time = self.clock.tick(60)
+        pg.display.set_caption(f'{self.clock.get_fps() : .1f}')
 
-icon = pygame.image.load('bebebe.jpg')
-pygame.display.set_icon(icon)
-pygame.display.set_caption('Zdarova epta')
+    def draw(self):
+        self.screen.fill("black")
+        self.map.draw()
+        self.player.draw()
 
-class Object:
-    def __init__(self, coordinates, color):
-        self.coordinates = coordinates
-        self.color = color
-
-Box1 = Object([70, 80, 90, 100], "white")
-Box2 = Object([600, 500, 220, 80], "white")
-Box3 = Object([150, 600, 100, 140], "white")
-
-Circle1 = Object([360, 240], "white")
-Circle2 = Object([700, 250], "white")
-
-
-speed = 3
-
-
-x = 512
-y = 400
-
-displacement_up = False
-displacement_down = False
-displacement_right = False
-displacement_left = False
-
-running = True
-while running:
-    screen.fill("black")
-    pygame.draw.rect(screen, Box1.color, Box1.coordinates)
-    pygame.draw.rect(screen, Box2.color, Box2.coordinates)
-    pygame.draw.rect(screen, Box3.color, Box3.coordinates)
-
-    pygame.draw.circle(screen, Circle1.color, Circle1.coordinates, 60)
-    pygame.draw.circle(screen, Circle2.color, Circle2.coordinates, 80)
-
-    pygame.draw.circle(screen, "orange", [x, y], 10)
-
-    pygame.display.flip()
-
-    if displacement_down and y < height:
-        y += speed
-    if displacement_up and y > 0:
-        y -= speed
-    if displacement_left and x > 0:
-        x -= speed
-    if displacement_right and x < 1024:
-        x += speed
-
-    for event in pygame.event.get():
-
-        if event.type == pygame.QUIT:
-            running = False
+    def check_events(self):
+        for event in pg.event.get():
+            if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == K_ESCAPE):
+                pg.quit()
+                sys.exit()
 
 
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                displacement_up = True
-            if event.key == pygame.K_a:
-                displacement_left = True
-            if event.key == pygame.K_s:
-                displacement_down = True
-            if event.key == pygame.K_d:
-                displacement_right = True
+    def run(self):
+        while True:
+            self.check_events()
+            self.update()
+            self.draw()
 
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_w:
-                displacement_up = False
-            if event.key == pygame.K_a:
-                displacement_left = False
-            if event.key == pygame.K_s:
-                displacement_down = False
-            if event.key == pygame.K_d:
-                displacement_right = False
-    clock.tick(60)
+if __name__ == '__main__':
+    game = Game()
+    game.run()
+
+
+
